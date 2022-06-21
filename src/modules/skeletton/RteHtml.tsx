@@ -1,10 +1,10 @@
 import { observer } from "mobx-react-lite"
 import { useRootStore } from "../../StoreProvider"
 
-export const Skeletton = observer(() => {
+export const RteHtml = observer(() => {
     const { content } = useRootStore()
     return (
-        <div className="flex flex-[50%] h-full w-full bg-green-100">
+        <div className="flex h-full w-full bg-gray-50 border-gray-300 border rounded-md p-2 overflow-auto overflow-wrap-anywhere">
             {content}
         </div>
     )

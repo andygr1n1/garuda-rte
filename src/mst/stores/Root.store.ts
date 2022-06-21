@@ -1,6 +1,7 @@
 import { types, cast } from "mobx-state-tree"
 import {
     findNodeDataId,
+    generateDivIds,
     getDataId,
     insertNewNodeOnEnterKey,
     isDataSelected,
@@ -17,7 +18,7 @@ export const Root$ = types
         selection_node_id: "",
         caret_position: 0,
         is_dirty: false,
-        content: "",
+        content: "Hey",
     })
     .actions((self) => ({
         onChangeField<Key extends keyof typeof self>(
@@ -72,6 +73,11 @@ export const Root$ = types
         },
     }))
     .actions((self) => ({
+        onKeyUp(/* e: React.KeyboardEvent<HTMLDivElement> */): void {
+            self.content = self.getEditorArea()?.innerHTML ?? ""
+            generateDivIds(self.getEditorArea())
+            self.saveCaretPosition()
+        },
         onKeyDown(e: React.KeyboardEvent<HTMLDivElement>): void {
             if (
                 e.key === "Enter" ||

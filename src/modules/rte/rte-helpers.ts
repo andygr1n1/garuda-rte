@@ -1,17 +1,23 @@
-export const getDataId = (node: ChildNode | Node | null | undefined): string => {
-    if (!node) return ''
+export const getDataId = (
+    node: ChildNode | Node | null | undefined
+): string => {
+    if (!node) return ""
 
-    const createParent = document.createElement('div')
+    const createParent = document.createElement("div")
     const clonedNode = node?.cloneNode()
     createParent.append(clonedNode)
 
     const regExp = new RegExp(/data-id=".+?"/gim)
-    const getDataId = createParent.innerHTML.match(regExp)?.[0]?.replace(new RegExp(/(data-id=)|(")/g), '')
-    return getDataId || ''
+    const getDataId = createParent.innerHTML
+        .match(regExp)?.[0]
+        ?.replace(new RegExp(/(data-id=)|(")/g), "")
+    return getDataId || ""
 }
 
-export const findNodeDataId = (node: Node | ChildNode | ParentNode | null | undefined): string => {
-    if (!node) return ''
+export const findNodeDataId = (
+    node: Node | ChildNode | ParentNode | null | undefined
+): string => {
+    if (!node) return ""
 
     let dataId: string = getDataId(node)
 
@@ -27,14 +33,15 @@ export const getNodeByDataId = (data_id: string): Element | null => {
 }
 
 export const sanitizeSpan = (node: ChildNode) => {
-    if (node.nodeName === 'SPAN') {
+    if (node.nodeName === "SPAN") {
         const getParentDataId = findNodeDataId(node)
 
         if (getParentDataId) {
             const parentNode = getNodeByDataId(getParentDataId)
 
             if (parentNode) {
-                const textContent = parentNode?.textContent ?? '' + node.textContent ?? ''
+                const textContent =
+                    parentNode?.textContent ?? "" + node.textContent ?? ""
                 node.parentNode?.removeChild(node)
                 parentNode.textContent = textContent
             }
@@ -46,8 +53,34 @@ export const sanitizeSpan = (node: ChildNode) => {
     }
 }
 
-export const insertNewNodeOnEnterKey = (rte: HTMLElement, newNode: Element, position = 0) => {
-    if (!newNode.textContent && !newNode.childNodes[0]) newNode.appendChild(document.createElement('br'))
+export const generateDivIds = (node: ChildNode) => {
+    if (node.nodeName === "DIV") {
+        // const getParentDataId = findNodeDataId(node)
+
+        // if (getParentDataId) {
+        //     const parentNode = getNodeByDataId(getParentDataId)
+
+        //     if (parentNode) {
+        //         const textContent = parentNode?.textContent ?? '' + node.textContent ?? ''
+        //         node.parentNode?.removeChild(node)
+        //         parentNode.textContent = textContent
+        //     }
+        // }
+        console.log("++", node, node.nodeName)
+    }
+
+    if (node.hasChildNodes()) {
+        node.childNodes.forEach((node) => generateDivIds(node))
+    }
+}
+
+export const insertNewNodeOnEnterKey = (
+    rte: HTMLElement,
+    newNode: Element,
+    position = 0
+) => {
+    if (!newNode.textContent && !newNode.childNodes[0])
+        newNode.appendChild(document.createElement("br"))
 
     const range = document.createRange()
     range.setStart(rte, position + 1)
@@ -59,7 +92,7 @@ export const insertNewNodeOnEnterKey = (rte: HTMLElement, newNode: Element, posi
 
 export const isDataSelected = (): boolean => {
     const selection = window.getSelection()
-    const rootNode = getNodeByDataId('rich-text-editor-root')
+    const rootNode = getNodeByDataId("rich-text-editor-root")
 
     if (!rootNode || !selection) return false
 
@@ -71,21 +104,28 @@ export const isDataSelected = (): boolean => {
     const anchorNode_DATA_ID = findNodeDataId(anchorNode)
     const focusNode_DATA_ID = findNodeDataId(focusNode)
 
-    if (!anchorNode_DATA_ID || !focusNode_DATA_ID) throw new Error('DATA_SELECT_ERROR')
+    if (!anchorNode_DATA_ID || !focusNode_DATA_ID)
+        throw new Error("DATA_SELECT_ERROR")
 
     const dataIsSelected =
-        (anchorOffset !== focusOffset && anchorNode_DATA_ID === focusNode_DATA_ID) ||
-        (anchorOffset !== focusOffset && anchorNode_DATA_ID !== focusNode_DATA_ID) ||
-        (anchorOffset === focusOffset && anchorNode_DATA_ID !== focusNode_DATA_ID)
+        (anchorOffset !== focusOffset &&
+            anchorNode_DATA_ID === focusNode_DATA_ID) ||
+        (anchorOffset !== focusOffset &&
+            anchorNode_DATA_ID !== focusNode_DATA_ID) ||
+        (anchorOffset === focusOffset &&
+            anchorNode_DATA_ID !== focusNode_DATA_ID)
 
     if (!dataIsSelected) {
         return false
     }
 
-    if (anchorOffset !== focusOffset && anchorNode_DATA_ID === focusNode_DATA_ID) {
+    if (
+        anchorOffset !== focusOffset &&
+        anchorNode_DATA_ID === focusNode_DATA_ID
+    ) {
         const node = getNodeByDataId(anchorNode_DATA_ID)
 
-        if (!node) throw new Error('DATA_SELECT_ERROR')
+        if (!node) throw new Error("DATA_SELECT_ERROR")
 
         let start_slice = 0
         let end_slice = 0
@@ -98,8 +138,9 @@ export const isDataSelected = (): boolean => {
             end_slice = anchorOffset
         }
 
-        const content_block_1 = node.textContent?.slice(0, start_slice) || ''
-        const content_block_2 = node.textContent?.slice(end_slice, node.textContent?.length) || ''
+        const content_block_1 = node.textContent?.slice(0, start_slice) || ""
+        const content_block_2 =
+            node.textContent?.slice(end_slice, node.textContent?.length) || ""
 
         const mergedContent = content_block_1 + content_block_2
 
@@ -107,8 +148,8 @@ export const isDataSelected = (): boolean => {
             node.textContent = mergedContent
             selection.setPosition(node.lastChild, start_slice)
         } else {
-            node.textContent = ''
-            node.appendChild(document.createElement('br'))
+            node.textContent = ""
+            node.appendChild(document.createElement("br"))
             selection.setPosition(node, 0)
         }
 
@@ -116,23 +157,25 @@ export const isDataSelected = (): boolean => {
     }
 
     if (
-        (anchorOffset !== focusOffset && anchorNode_DATA_ID !== focusNode_DATA_ID) ||
-        (anchorOffset === focusOffset && anchorNode_DATA_ID !== focusNode_DATA_ID)
+        (anchorOffset !== focusOffset &&
+            anchorNode_DATA_ID !== focusNode_DATA_ID) ||
+        (anchorOffset === focusOffset &&
+            anchorNode_DATA_ID !== focusNode_DATA_ID)
     ) {
         const anchor_node_data = {
                 index: 0,
                 slice: anchorOffset,
-                data_id: '',
+                data_id: "",
                 no_content: false,
-                content: '',
+                content: "",
                 selection_start: false,
             },
             focus_node_data = {
                 index: 0,
                 slice: focusOffset,
-                data_id: '',
+                data_id: "",
                 no_content: false,
-                content: '',
+                content: "",
                 selection_start: false,
             }
 
@@ -153,8 +196,12 @@ export const isDataSelected = (): boolean => {
             focus_node_data.selection_start = true
         }
 
-        const start_node = anchor_node_data.selection_start ? anchor_node_data : focus_node_data
-        const end_node = !anchor_node_data.selection_start ? anchor_node_data : focus_node_data
+        const start_node = anchor_node_data.selection_start
+            ? anchor_node_data
+            : focus_node_data
+        const end_node = !anchor_node_data.selection_start
+            ? anchor_node_data
+            : focus_node_data
 
         const nodes_for_complete_removal: string[] = []
 
@@ -163,7 +210,8 @@ export const isDataSelected = (): boolean => {
                 if (index < start_node.index || index > end_node.index) return
 
                 if (start_node.index === index) {
-                    const content_block = node.textContent?.slice(0, start_node.slice) || ''
+                    const content_block =
+                        node.textContent?.slice(0, start_node.slice) || ""
 
                     if (content_block) {
                         node.textContent = content_block
@@ -180,7 +228,11 @@ export const isDataSelected = (): boolean => {
                 // \\ --- remove nodes between selection
 
                 if (end_node.index === index) {
-                    const content_block = node.textContent?.slice(end_node.slice, node.textContent.length) || ''
+                    const content_block =
+                        node.textContent?.slice(
+                            end_node.slice,
+                            node.textContent.length
+                        ) || ""
 
                     if (content_block) {
                         node.textContent = content_block
@@ -203,22 +255,35 @@ export const isDataSelected = (): boolean => {
 
                     if (!start_node.no_content && end_node.no_content) {
                         const startNode = getNodeByDataId(start_node.data_id)
-                        if (!startNode) throw new Error('DATA_SELECT ERROR: START_NODE IS MISSING')
+                        if (!startNode)
+                            throw new Error(
+                                "DATA_SELECT ERROR: START_NODE IS MISSING"
+                            )
 
-                        const content_block_from_start_node = startNode.textContent
-                        startNode.textContent = content_block_from_start_node + content_block
+                        const content_block_from_start_node =
+                            startNode.textContent
+                        startNode.textContent =
+                            content_block_from_start_node + content_block
 
-                        selection.setPosition(startNode.lastChild, start_node.slice)
+                        selection.setPosition(
+                            startNode.lastChild,
+                            start_node.slice
+                        )
                         getNodeByDataId(end_node.data_id)?.remove()
                         return
                     }
 
                     if (!start_node.no_content && !end_node.no_content) {
                         const startNode = getNodeByDataId(start_node.data_id)
-                        if (!startNode) throw new Error('DATA_SELECT ERROR: START_NODE IS MISSING')
+                        if (!startNode)
+                            throw new Error(
+                                "DATA_SELECT ERROR: START_NODE IS MISSING"
+                            )
 
-                        const content_block_from_start_node = startNode.textContent
-                        startNode.textContent = content_block_from_start_node + content_block
+                        const content_block_from_start_node =
+                            startNode.textContent
+                        startNode.textContent =
+                            content_block_from_start_node + content_block
 
                         selection.setPosition(node.lastChild, start_node.slice)
                         nodes_for_complete_removal.push(findNodeDataId(node))
@@ -231,7 +296,7 @@ export const isDataSelected = (): boolean => {
                 getNodeByDataId(data_id)?.remove()
             })
         } catch (error) {
-            error && console.error('Text Editor error:', error)
+            error && console.error("Text Editor error:", error)
         }
 
         return true
